@@ -1,8 +1,13 @@
+import '../../styles/top-menu-bar.css'
+
 function TopMenuBar(){
     return(
-        <>
-            <h1>TopMenuBar</h1>
-        </>
+        <div className="vertical-bar-container">
+            <button className="menu-bar-button first-button">File</button>
+            <button className="menu-bar-button">Modifica</button>
+            <button className="menu-bar-button">Visualizza</button>
+            <button className="menu-bar-button">?</button>
+        </div>
     )
 }
 export default TopMenuBar;
