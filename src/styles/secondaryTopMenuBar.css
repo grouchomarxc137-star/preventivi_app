@@ -1,0 +1,58 @@
+.vertical-bar-container.secondary-bar{
+    height: 52px;
+    background-color: white;
+    border-bottom: 1px solid #d3d3d3;
+    gap: 26px;
+    position: relative;
+}
+
+.secondary-menu-items{
+    object-fit: contain;
+    width: 26px;
+    height: 20px;
+}
+.secondary-menu-items-button{
+    border: none;
+    background: transparent;
+    padding: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    position: relative;
+    border-radius: 4px;
+    transition: background-color 120ms ease, box-shadow 120ms ease, transform 120ms ease, border-radius 120ms ease;
+}
+.secondary-menu-items-button.first{
+    margin-left: 10px;
+}
+
+/*
+  Grouping: separators only between groups, not between items in the same group.
+  Add class .secondary-group to each group wrapper.
+*/
+.secondary-group{
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    position: relative;
+}
+
+/* Add a vertical separator before any group that follows another group */
+.secondary-group + .secondary-group:not(.no-separator)::before{
+    content: "";
+    position: absolute;
+    left: -13px; /* half of 26px gap to center between groups */
+    top: 6px;
+    bottom: 6px;
+    width: 1px;
+    background: #e0e0e0;
+}
+
+
+.secondary-menu-items-button:hover{
+    fill: #e5e5e5;
+    background-color: #f2f2f2;
+    box-shadow: 0 0 0 1px #e5e5e5 inset;
+    transform: translateY(-1px);
+    border-radius: 8px;
+}

@@ -7,6 +7,7 @@ function TopMenuBar(){
             <button className="menu-bar-button">Modifica</button>
             <button className="menu-bar-button">Visualizza</button>
             <button className="menu-bar-button">?</button>
+            <button className="menu-bar-button last-button">Guida</button>
         </div>
     )
 }

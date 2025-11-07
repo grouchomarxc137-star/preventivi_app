@@ -19,7 +19,19 @@
     color: black;
     border: none;
     cursor: pointer;
+    transition: background-color 120ms ease, box-shadow 120ms ease, transform 120ms ease, border-radius 120ms ease;
 }
 .menu-bar-button.first-button{
     margin-left: 10px;
+}
+.menu-bar-button.last-button{
+    margin-left: auto;
+    margin-right: 10px;
+}
+
+.menu-bar-button:hover{
+    background-color: #f2f2f2;
+    box-shadow: 0 0 0 1px #e5e5e5 inset;
+    transform: translateY(-1px);
+    border-radius: 8px;
 }
