@@ -1,0 +1,68 @@
+.initial-body-container{
+    flex: 1 1 auto;
+    min-height: 0; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    outline: 1px solid red;
+    gap: 20px;
+    background-color: #fbfbfc;
+}
+.project-logo{
+    width: 100px;
+    max-width: 25vmin;
+    aspect-ratio: 1 / 1; 
+    background-color: #ebebf0;
+    border: 0px solid #d1d1d6;
+    border-radius: 50%; 
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.project-selection-buttons{
+    margin-top: 20px;
+}
+.project-header{
+    font-size: 24px;
+    font-weight: 600;
+}
+.project-desc{
+    text-align: center;
+    color: #2c2c2c;
+}
+.project-selection-buttons{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.project-button{
+    border: none;
+    border-radius: 8px;
+    width: 140px;
+    height: 40px;
+    cursor: pointer;
+}
+.project-button.newProjectButton{
+    background-color: #030213;
+    color: white;
+}
+.project-button.openProjectButton{
+    background-color: white;
+    color: black;
+    border: 1px solid #c3c2c2;
+    transition: background-color 120ms ease, box-shadow 120ms ease, transform 120ms ease, border-radius 120ms ease; 
+}
+.project-button.openProjectButton:hover{
+    background-color: #f2f2f2;
+    box-shadow: 0 0 0 1px #e5e5e5 inset;
+    transform: translateY(-1px);
+    border-radius: 8px;
+}
+.project-button.newProjectButton:hover{
+    box-shadow: 0 0 0 1px #e5e5e5 inset;
+    transform: translateY(-1px);
+    border-radius: 8px;
+}

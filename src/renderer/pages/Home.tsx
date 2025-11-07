@@ -1,6 +1,7 @@
 import SecondaryTopMenuBar from "../components/SecondaryTopMenuBar";
 import TopMenuBar from "../components/TopMenuBar";
 import BottomMenuBar from "../components/BottomMenuBar";
+import InitialBody from "../components/InitialBody";
 
 function Home(){
     return(
@@ -8,6 +9,7 @@ function Home(){
             <TopMenuBar />
             <SecondaryTopMenuBar />
             <BottomMenuBar />
+            <InitialBody />
         </>
     )
 }
