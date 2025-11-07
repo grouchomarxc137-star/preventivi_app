@@ -7,7 +7,7 @@ function SecondaryTopMenuBar(){
                 <button className="secondary-menu-items-button first">
                     <img
                         className="secondary-menu-items"
-                        src="src/assets/sidebar-collapse.svg"
+                        src="src/assets/sidebar-open.svg"
                         alt="Collapse sidebar"
                         draggable={false}
                     />
@@ -28,6 +28,14 @@ function SecondaryTopMenuBar(){
                         className="secondary-menu-items"
                         src="src/assets/add-file.svg"
                         alt="Add file"
+                        draggable={false}
+                    />
+                </button>
+                <button className="secondary-menu-items-button">
+                    <img
+                        className="secondary-menu-items"
+                        src="src/assets/save-file.svg"
+                        alt="Save file"
                         draggable={false}
                     />
                 </button>
