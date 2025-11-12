@@ -24,21 +24,14 @@ function OpenProjectModal({ isOpen, onClose, onOpenFile }: OpenProjectModalProps
                         <div className="recent-projects-section">
                             <div className="section-header-row">
                                 <div className="section-header">
-                                    <svg
+                                    <img 
+                                        src="src/assets/recent-project.svg" 
+                                        alt="Recent projects"
                                         className="section-icon"
                                         width="20"
                                         height="20"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        {/* Placeholder icon - user will replace later */}
-                                        <rect x="3" y="3" width="18" height="18" rx="2" />
-                                        <path d="M9 9h6v6H9z" />
-                                    </svg>
+                                        draggable={false}
+                                    />
                                     <h3>Progetti recenti</h3>
                                 </div>
                                 <button className="open-file-button" onClick={onOpenFile}>

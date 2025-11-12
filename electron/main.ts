@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -70,3 +70,8 @@ app.on('activate', () => {
 })
 
 app.whenReady().then(createWindow)
+
+// Handle IPC messages
+ipcMain.on('app:exit', () => {
+  app.quit()
+})

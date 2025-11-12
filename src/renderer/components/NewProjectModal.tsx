@@ -6,6 +6,7 @@ interface NewProjectModalProps {
     onClose: () => void
     onSubmit: (data: {
         progetto: string
+        commessa: string
         tipologia: string
         norma: string
         data: string
@@ -17,6 +18,7 @@ interface NewProjectModalProps {
 function NewProjectModal({ isOpen, onClose, onSubmit }: NewProjectModalProps) {
     const [formData, setFormData] = useState({
         progetto: '',
+        commessa: '',
         tipologia: '',
         norma: '',
         data: '',
@@ -29,7 +31,7 @@ function NewProjectModal({ isOpen, onClose, onSubmit }: NewProjectModalProps) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         onSubmit(formData)
-        setFormData({ progetto: '', tipologia: '', norma: '', data: '', descrizione: '', note: '' })
+        setFormData({ progetto: '', commessa: '', tipologia: '', norma: '', data: '', descrizione: '', note: '' })
         onClose()
     }
 
@@ -54,6 +56,18 @@ function NewProjectModal({ isOpen, onClose, onSubmit }: NewProjectModalProps) {
                             placeholder="es. Impianto Ufficio 1"
                             value={formData.progetto}
                             onChange={(e) => handleChange('progetto', e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="form-field">
+                        <label htmlFor="commessa">Commessa</label>
+
+                        <input
+                            id="commessa"
+                            type="text"
+                            placeholder="numero commessa"
+                            value={formData.commessa}
+                            onChange={(e) => handleChange('commessa', e.target.value)}
                             required
                         />
                     </div>

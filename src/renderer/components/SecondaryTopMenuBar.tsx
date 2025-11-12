@@ -1,6 +1,10 @@
 import "../../styles/secondaryTopMenuBar.css"
 
-function SecondaryTopMenuBar(){
+interface SecondaryTopMenuBarProps {
+    onOpenProject?: () => void
+}
+
+function SecondaryTopMenuBar({ onOpenProject }: SecondaryTopMenuBarProps){
     return(
             <div className="vertical-bar-container secondary-bar">
             <div className="secondary-group first-group">
@@ -15,7 +19,10 @@ function SecondaryTopMenuBar(){
             </div>
 
             <div className="secondary-group explorer-group">
-                <button className="secondary-menu-items-button">
+                <button 
+                    className="secondary-menu-items-button"
+                    onClick={onOpenProject}
+                >
                     <img
                         className="secondary-menu-items"
                         src="src/assets/folder-open.svg"
