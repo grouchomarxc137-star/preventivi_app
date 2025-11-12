@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import '../../styles/workspace.css'
 
 interface ComponentProperties {
@@ -42,6 +42,7 @@ function Workspace({ isLeftSectionVisible, isRightSectionVisible, onToggleLeftSe
     const [draggedComponent, setDraggedComponent] = useState<Component | null>(null)
     const [isDragOver, setIsDragOver] = useState(false)
     const [contextMenu, setContextMenu] = useState<{ x: number; y: number; componentId: string } | null>(null)
+    const workspaceRef = useRef<HTMLDivElement>(null)
 
     // Test data for Quadri Elettrici
     const componentData = {
@@ -270,6 +271,52 @@ function Workspace({ isLeftSectionVisible, isRightSectionVisible, onToggleLeftSe
         setSelectedComponent(component)
     }
 
+    const updateComponentProperty = (componentId: string, propertyKey: string, value: string) => {
+        const updatedProperty = { [propertyKey]: value }
+
+        // Update in selectedComponents
+        setSelectedComponents(prev => prev.map(comp => 
+            comp.id === componentId 
+                ? { ...comp, properties: { ...comp.properties, ...updatedProperty } }
+                : comp
+        ))
+
+        // Update in canvasComponents
+        setCanvasComponents(prev => prev.map(comp =>
+            comp.id === componentId
+                ? { ...comp, properties: { ...comp.properties, ...updatedProperty } }
+                : comp
+        ))
+
+        // Update selectedComponent if it's the one being edited
+        setSelectedComponent(prev => {
+            if (prev?.id === componentId) {
+                return {
+                    ...prev,
+                    properties: { ...prev.properties, ...updatedProperty }
+                }
+            }
+            return prev
+        })
+    }
+
+    const getEditablePropertyType = (key: string): 'input' | 'select' | 'readonly' => {
+        const editableKeys = ['tensione', 'corrente', 'potenza', 'prezzo']
+        const selectKeys: { [key: string]: string[] } = {
+            tensione: ['230V', '400V', '690V'],
+            corrente: ['16A', '32A', '63A', '100A', '125A', '160A'],
+            potenza: ['5kW', '10kW', '12kW', '25kW', '40kW', '50kW']
+        }
+
+        if (selectKeys[key]) {
+            return 'select'
+        }
+        if (editableKeys.includes(key)) {
+            return 'input'
+        }
+        return 'readonly'
+    }
+
     const isComponentOnCanvas = (componentId: string) => {
         return canvasComponents.some(comp => comp.id === componentId)
     }
@@ -313,8 +360,42 @@ function Workspace({ isLeftSectionVisible, isRightSectionVisible, onToggleLeftSe
         }
     }, [contextMenu])
 
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            const target = e.target as HTMLElement
+
+            // Don't deselect only if clicking directly on:
+            // - Canvas components (the component itself on canvas)
+            // - Selected component items (the item in the list)
+            // - Context menu
+            // - Property pane (properties panel, inputs, selects, labels)
+            if (
+                target.closest('.context-menu') ||
+                target.closest('.canvas-component') ||
+                target.closest('.selected-component-item') ||
+                target.closest('.right-section-top') ||
+                target.closest('.properties-content') ||
+                target.closest('.properties-list') ||
+                target.closest('.property-item') ||
+                target.closest('.property-input') ||
+                target.closest('.property-label') ||
+                target.closest('.property-value')
+            ) {
+                return
+            }
+
+            // Deselect for all other clicks
+            setSelectedComponent(null)
+        }
+
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside)
+        }
+    }, [])
+
     return (
-        <div className="workspace-container">
+        <div className="workspace-container" ref={workspaceRef}>
             <div className={`workspace-left-section ${isLeftSectionVisible ? 'visible' : 'hidden'}`}>
                 <div className="left-section-header">
                     <div className="left-section-header-top">
@@ -474,12 +555,59 @@ function Workspace({ isLeftSectionVisible, isRightSectionVisible, onToggleLeftSe
                                     <h4 className="property-component-name">{selectedComponent.name}</h4>
                                     <div className="property-component-brand">{selectedComponent.brand}</div>
                                 </div>
-                                {Object.entries(selectedComponent.properties).map(([key, value]) => (
-                                    <div key={key} className="property-item">
-                                        <span className="property-label">{key.charAt(0).toUpperCase() + key.slice(1)}:</span>
-                                        <span className="property-value">{value}</span>
-                                    </div>
-                                ))}
+                                {Object.entries(selectedComponent.properties).map(([key, value]) => {
+                                    const editType = getEditablePropertyType(key)
+                                    return (
+                                        <div key={key} className="property-item">
+                                            <span className="property-label">{key.charAt(0).toUpperCase() + key.slice(1)}:</span>
+                                            {editType === 'select' ? (
+                                                <select
+                                                    className="property-input property-select"
+                                                    value={value || ''}
+                                                    onChange={(e) => updateComponentProperty(selectedComponent.id, key, e.target.value)}
+                                                >
+                                                    {key === 'tensione' && (
+                                                        <>
+                                                            <option value="230V">230V</option>
+                                                            <option value="400V">400V</option>
+                                                            <option value="690V">690V</option>
+                                                        </>
+                                                    )}
+                                                    {key === 'corrente' && (
+                                                        <>
+                                                            <option value="16A">16A</option>
+                                                            <option value="32A">32A</option>
+                                                            <option value="63A">63A</option>
+                                                            <option value="100A">100A</option>
+                                                            <option value="125A">125A</option>
+                                                            <option value="160A">160A</option>
+                                                        </>
+                                                    )}
+                                                    {key === 'potenza' && (
+                                                        <>
+                                                            <option value="5kW">5kW</option>
+                                                            <option value="10kW">10kW</option>
+                                                            <option value="12kW">12kW</option>
+                                                            <option value="25kW">25kW</option>
+                                                            <option value="40kW">40kW</option>
+                                                            <option value="50kW">50kW</option>
+                                                        </>
+                                                    )}
+                                                </select>
+                                            ) : editType === 'input' ? (
+                                                <input
+                                                    type="text"
+                                                    className="property-input"
+                                                    value={value || ''}
+                                                    onChange={(e) => updateComponentProperty(selectedComponent.id, key, e.target.value)}
+                                                    placeholder={`Inserisci ${key}`}
+                                                />
+                                            ) : (
+                                                <span className="property-value">{value}</span>
+                                            )}
+                                        </div>
+                                    )
+                                })}
                             </div>
                         ) : (
                             <p className="no-selection">Nessun componente selezionato</p>
