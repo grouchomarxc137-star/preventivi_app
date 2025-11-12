@@ -1,11 +1,10 @@
 .initial-body-container{
-    flex: 1 1 auto;
-    min-height: 0; 
+    height: calc(100vh - 36px - 52px - 25px);
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    outline: 1px solid red;
+    border: 1px solid red;
     gap: 20px;
     background-color: #fbfbfc;
 }
