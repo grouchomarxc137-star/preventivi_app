@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import '../../styles/workspace.css'
 
 interface ComponentProperties {
@@ -31,10 +31,11 @@ interface WorkspaceProps {
     isRightSectionVisible: boolean
     onToggleLeftSection?: () => void
     onToggleRightSection?: () => void
+    onRegisterZoomHandlers?: (handlers: { zoomIn: () => void; zoomOut: () => void }) => void
 }
 
-function Workspace({ isLeftSectionVisible, isRightSectionVisible, onToggleLeftSection, onToggleRightSection }: WorkspaceProps) {
-    const [expandedTypes, setExpandedTypes] = useState<Set<string>>(new Set())
+function Workspace({ isLeftSectionVisible, isRightSectionVisible, onToggleLeftSection, onToggleRightSection, onRegisterZoomHandlers }: WorkspaceProps) {
+    const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
     const [expandedBrands, setExpandedBrands] = useState<Set<string>>(new Set())
     const [selectedComponents, setSelectedComponents] = useState<Component[]>([])
     const [selectedComponent, setSelectedComponent] = useState<Component | null>(null)
@@ -43,22 +44,24 @@ function Workspace({ isLeftSectionVisible, isRightSectionVisible, onToggleLeftSe
     const [isDragOver, setIsDragOver] = useState(false)
     const [contextMenu, setContextMenu] = useState<{ x: number; y: number; componentId: string } | null>(null)
     const workspaceRef = useRef<HTMLDivElement>(null)
+    const [zoomLevel, setZoomLevel] = useState(1)
+    const canvasGridRef = useRef<HTMLDivElement>(null)
 
-    // Test data for Quadri Elettrici
+    // Test data organized by sections
     const componentData = {
-        types: [
+        sections: [
             {
-                id: 'quadri-elettrici',
-                name: 'Quadri Elettrici',
+                id: 'quadri',
+                name: 'Quadri',
                 brands: [
                     {
-                        id: 'abb',
+                        id: 'abb-quadri',
                         name: 'ABB',
                         components: [
                             { 
                                 id: 'comp1', 
                                 name: 'Quadro Principale ABB 100A', 
-                                type: 'Quadri Elettrici', 
+                                type: 'Quadri', 
                                 brand: 'ABB',
                                 properties: {
                                     tensione: '400V',
@@ -73,7 +76,7 @@ function Workspace({ isLeftSectionVisible, isRightSectionVisible, onToggleLeftSe
                             { 
                                 id: 'comp2', 
                                 name: 'Quadro Secondario ABB 63A', 
-                                type: 'Quadri Elettrici', 
+                                type: 'Quadri', 
                                 brand: 'ABB',
                                 properties: {
                                     tensione: '400V',
@@ -88,7 +91,7 @@ function Workspace({ isLeftSectionVisible, isRightSectionVisible, onToggleLeftSe
                             { 
                                 id: 'comp3', 
                                 name: 'Quadro Distribuzione ABB 32A', 
-                                type: 'Quadri Elettrici', 
+                                type: 'Quadri', 
                                 brand: 'ABB',
                                 properties: {
                                     tensione: '400V',
@@ -103,13 +106,13 @@ function Workspace({ isLeftSectionVisible, isRightSectionVisible, onToggleLeftSe
                         ]
                     },
                     {
-                        id: 'schneider',
+                        id: 'schneider-quadri',
                         name: 'Schneider Electric',
                         components: [
                             { 
                                 id: 'comp4', 
                                 name: 'Quadro Principale Schneider 100A', 
-                                type: 'Quadri Elettrici', 
+                                type: 'Quadri', 
                                 brand: 'Schneider Electric',
                                 properties: {
                                     tensione: '400V',
@@ -124,7 +127,7 @@ function Workspace({ isLeftSectionVisible, isRightSectionVisible, onToggleLeftSe
                             { 
                                 id: 'comp5', 
                                 name: 'Quadro Secondario Schneider 63A', 
-                                type: 'Quadri Elettrici', 
+                                type: 'Quadri', 
                                 brand: 'Schneider Electric',
                                 properties: {
                                     tensione: '400V',
@@ -139,13 +142,13 @@ function Workspace({ isLeftSectionVisible, isRightSectionVisible, onToggleLeftSe
                         ]
                     },
                     {
-                        id: 'siemens',
+                        id: 'siemens-quadri',
                         name: 'Siemens',
                         components: [
                             { 
                                 id: 'comp6', 
                                 name: 'Quadro Principale Siemens 100A', 
-                                type: 'Quadri Elettrici', 
+                                type: 'Quadri', 
                                 brand: 'Siemens',
                                 properties: {
                                     tensione: '400V',
@@ -160,7 +163,7 @@ function Workspace({ isLeftSectionVisible, isRightSectionVisible, onToggleLeftSe
                             { 
                                 id: 'comp7', 
                                 name: 'Quadro Secondario Siemens 63A', 
-                                type: 'Quadri Elettrici', 
+                                type: 'Quadri', 
                                 brand: 'Siemens',
                                 properties: {
                                     tensione: '400V',
@@ -171,20 +174,269 @@ function Workspace({ isLeftSectionVisible, isRightSectionVisible, onToggleLeftSe
                                     certificazione: 'CEI EN 61439',
                                     prezzo: '€800.00'
                                 }
-                            },
+                            }
+                        ]
+                    },
+                    {
+                        id: 'bticino-quadri',
+                        name: 'BITICINO',
+                        components: [
                             { 
-                                id: 'comp8', 
-                                name: 'Quadro Distribuzione Siemens 32A', 
-                                type: 'Quadri Elettrici', 
-                                brand: 'Siemens',
+                                id: 'comp9', 
+                                name: 'Quadro Principale BITICINO 100A', 
+                                type: 'Quadri', 
+                                brand: 'BITICINO',
                                 properties: {
                                     tensione: '400V',
-                                    corrente: '32A',
-                                    potenza: '12kW',
-                                    dimensioni: '400x300x150mm',
-                                    peso: '11kg',
+                                    corrente: '100A',
+                                    potenza: '40kW',
+                                    dimensioni: '600x400x200mm',
+                                    peso: '23kg',
                                     certificazione: 'CEI EN 61439',
-                                    prezzo: '€420.00'
+                                    prezzo: '€1,150.00'
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'bars',
+                name: 'Bars',
+                brands: [
+                    {
+                        id: 'abb-bars',
+                        name: 'ABB',
+                        components: [
+                            {
+                                id: 'bar1',
+                                name: 'Barra ABB 100A',
+                                type: 'Bars',
+                                brand: 'ABB',
+                                properties: {
+                                    corrente: '100A',
+                                    dimensioni: 'Standard',
+                                    prezzo: '€80.00'
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        id: 'schneider-bars',
+                        name: 'Schneider Electric',
+                        components: [
+                            {
+                                id: 'bar2',
+                                name: 'Barra Schneider 100A',
+                                type: 'Bars',
+                                brand: 'Schneider Electric',
+                                properties: {
+                                    corrente: '100A',
+                                    dimensioni: 'Standard',
+                                    prezzo: '€85.00'
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        id: 'bticino-bars',
+                        name: 'BITICINO',
+                        components: [
+                            {
+                                id: 'bar3',
+                                name: 'Barra BITICINO 63A',
+                                type: 'Bars',
+                                brand: 'BITICINO',
+                                properties: {
+                                    corrente: '63A',
+                                    dimensioni: 'Standard',
+                                    prezzo: '€75.00'
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'interuttori',
+                name: 'Interuttori',
+                brands: [
+                    {
+                        id: 'abb-interuttori',
+                        name: 'ABB',
+                        components: [
+                            {
+                                id: 'int1',
+                                name: 'Interruttore ABB 16A',
+                                type: 'Interuttori',
+                                brand: 'ABB',
+                                properties: {
+                                    tensione: '230V',
+                                    corrente: '16A',
+                                    potenza: '3.6kW',
+                                    prezzo: '€45.00'
+                                }
+                            },
+                            {
+                                id: 'int2',
+                                name: 'Interruttore ABB 32A',
+                                type: 'Interuttori',
+                                brand: 'ABB',
+                                properties: {
+                                    tensione: '230V',
+                                    corrente: '32A',
+                                    potenza: '7.4kW',
+                                    prezzo: '€65.00'
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        id: 'schneider-interuttori',
+                        name: 'Schneider Electric',
+                        components: [
+                            {
+                                id: 'int3',
+                                name: 'Interruttore Schneider 16A',
+                                type: 'Interuttori',
+                                brand: 'Schneider Electric',
+                                properties: {
+                                    tensione: '230V',
+                                    corrente: '16A',
+                                    potenza: '3.6kW',
+                                    prezzo: '€50.00'
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        id: 'bticino-interuttori',
+                        name: 'BITICINO',
+                        components: [
+                            {
+                                id: 'int4',
+                                name: 'Interruttore BITICINO 16A',
+                                type: 'Interuttori',
+                                brand: 'BITICINO',
+                                properties: {
+                                    tensione: '230V',
+                                    corrente: '16A',
+                                    potenza: '3.6kW',
+                                    prezzo: '€42.00'
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'commutatori',
+                name: 'Commutatori',
+                brands: [
+                    {
+                        id: 'abb-commutatori',
+                        name: 'ABB',
+                        components: [
+                            {
+                                id: 'com1',
+                                name: 'Commutatore ABB 2 Posizioni',
+                                type: 'Commutatori',
+                                brand: 'ABB',
+                                properties: {
+                                    tensione: '400V',
+                                    corrente: '63A',
+                                    prezzo: '€180.00'
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        id: 'schneider-commutatori',
+                        name: 'Schneider Electric',
+                        components: [
+                            {
+                                id: 'com2',
+                                name: 'Commutatore Schneider 2 Posizioni',
+                                type: 'Commutatori',
+                                brand: 'Schneider Electric',
+                                properties: {
+                                    tensione: '400V',
+                                    corrente: '63A',
+                                    prezzo: '€190.00'
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        id: 'bticino-commutatori',
+                        name: 'BITICINO',
+                        components: [
+                            {
+                                id: 'com3',
+                                name: 'Commutatore BITICINO 2 Posizioni',
+                                type: 'Commutatori',
+                                brand: 'BITICINO',
+                                properties: {
+                                    tensione: '400V',
+                                    corrente: '63A',
+                                    prezzo: '€175.00'
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'distributori',
+                name: 'Distributori',
+                brands: [
+                    {
+                        id: 'abb-distributori',
+                        name: 'ABB',
+                        components: [
+                            {
+                                id: 'dist1',
+                                name: 'Distributore ABB 3 Poli',
+                                type: 'Distributori',
+                                brand: 'ABB',
+                                properties: {
+                                    tensione: '400V',
+                                    corrente: '63A',
+                                    prezzo: '€120.00'
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        id: 'schneider-distributori',
+                        name: 'Schneider Electric',
+                        components: [
+                            {
+                                id: 'dist2',
+                                name: 'Distributore Schneider 3 Poli',
+                                type: 'Distributori',
+                                brand: 'Schneider Electric',
+                                properties: {
+                                    tensione: '400V',
+                                    corrente: '63A',
+                                    prezzo: '€125.00'
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        id: 'bticino-distributori',
+                        name: 'BITICINO',
+                        components: [
+                            {
+                                id: 'dist3',
+                                name: 'Distributore BITICINO 3 Poli',
+                                type: 'Distributori',
+                                brand: 'BITICINO',
+                                properties: {
+                                    tensione: '400V',
+                                    corrente: '63A',
+                                    prezzo: '€115.00'
                                 }
                             }
                         ]
@@ -194,14 +446,14 @@ function Workspace({ isLeftSectionVisible, isRightSectionVisible, onToggleLeftSe
         ]
     }
 
-    const toggleType = (typeId: string) => {
-        const newExpanded = new Set(expandedTypes)
-        if (newExpanded.has(typeId)) {
-            newExpanded.delete(typeId)
+    const toggleSection = (sectionId: string) => {
+        const newExpanded = new Set(expandedSections)
+        if (newExpanded.has(sectionId)) {
+            newExpanded.delete(sectionId)
         } else {
-            newExpanded.add(typeId)
+            newExpanded.add(sectionId)
         }
-        setExpandedTypes(newExpanded)
+        setExpandedSections(newExpanded)
     }
 
     const toggleBrand = (brandId: string) => {
@@ -213,6 +465,29 @@ function Workspace({ isLeftSectionVisible, isRightSectionVisible, onToggleLeftSe
         }
         setExpandedBrands(newExpanded)
     }
+
+    const collapseAll = () => {
+        setExpandedSections(new Set())
+        setExpandedBrands(new Set())
+    }
+
+    const handleZoomIn = useCallback(() => {
+        setZoomLevel(prev => Math.min(prev + 0.1, 3)) // Max zoom 300%
+    }, [])
+
+    const handleZoomOut = useCallback(() => {
+        setZoomLevel(prev => Math.max(prev - 0.1, 0.5)) // Min zoom 50%
+    }, [])
+
+    // Register zoom handlers with parent component
+    useEffect(() => {
+        if (onRegisterZoomHandlers) {
+            onRegisterZoomHandlers({
+                zoomIn: handleZoomIn,
+                zoomOut: handleZoomOut
+            })
+        }
+    }, [onRegisterZoomHandlers, handleZoomIn, handleZoomOut])
 
     const addComponent = (component: Component) => {
         setSelectedComponents(prev => [...prev, component])
@@ -400,18 +675,27 @@ function Workspace({ isLeftSectionVisible, isRightSectionVisible, onToggleLeftSe
                 <div className="left-section-header">
                     <div className="left-section-header-top">
                         <h3 className="left-section-title">Componenti</h3>
-                        <button 
-                            className="collapse-button"
-                            onClick={onToggleLeftSection}
-                            title="Collassa pannello"
-                        >
-                            <img
-                                src={isLeftSectionVisible ? "src/assets/sidebar-collapse.svg" : "src/assets/sidebar-open.svg"}
-                                alt={isLeftSectionVisible ? "Collapse" : "Expand"}
-                                className="collapse-icon"
-                                draggable={false}
-                            />
-                        </button>
+                        <div className="header-actions">
+                            <button 
+                                className="collapse-all-button"
+                                onClick={collapseAll}
+                                title="Collassa tutto"
+                            >
+                                Collassa tutto
+                            </button>
+                            <button 
+                                className="collapse-button"
+                                onClick={onToggleLeftSection}
+                                title="Collassa pannello"
+                            >
+                                <img
+                                    src={isLeftSectionVisible ? "src/assets/sidebar-collapse.svg" : "src/assets/sidebar-open.svg"}
+                                    alt={isLeftSectionVisible ? "Collapse" : "Expand"}
+                                    className="collapse-icon"
+                                    draggable={false}
+                                />
+                            </button>
+                        </div>
                     </div>
                     <input 
                         type="text" 
@@ -425,18 +709,18 @@ function Workspace({ isLeftSectionVisible, isRightSectionVisible, onToggleLeftSe
                     </select>
                 </div>
                 <div className="component-hierarchy">
-                    {componentData.types.map(type => (
-                        <div key={type.id} className="hierarchy-item">
+                    {componentData.sections.map(section => (
+                        <div key={section.id} className="hierarchy-item">
                             <div 
-                                className={`hierarchy-header ${expandedTypes.has(type.id) ? 'expanded' : ''}`}
-                                onClick={() => toggleType(type.id)}
+                                className={`hierarchy-header ${expandedSections.has(section.id) ? 'expanded' : ''}`}
+                                onClick={() => toggleSection(section.id)}
                             >
                                 <span className="hierarchy-arrow">▶</span>
-                                <span>{type.name}</span>
+                                <span>{section.name}</span>
                             </div>
-                            {expandedTypes.has(type.id) && (
+                            {expandedSections.has(section.id) && (
                                 <div className="hierarchy-content">
-                                    {type.brands.map(brand => (
+                                    {section.brands.map(brand => (
                                         <div key={brand.id} className="hierarchy-item">
                                             <div 
                                                 className={`hierarchy-header ${expandedBrands.has(brand.id) ? 'expanded' : ''}`}
@@ -511,7 +795,16 @@ function Workspace({ isLeftSectionVisible, isRightSectionVisible, onToggleLeftSe
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                 >
-                    <div className="canvas-grid">
+                    <div 
+                        className="canvas-grid"
+                        ref={canvasGridRef}
+                        style={{
+                            transform: `scale(${zoomLevel})`,
+                            transformOrigin: 'top left',
+                            width: `${100 / zoomLevel}%`,
+                            height: `${100 / zoomLevel}%`
+                        }}
+                    >
                         {canvasComponents.map(comp => (
                             <div
                                 key={comp.canvasId}

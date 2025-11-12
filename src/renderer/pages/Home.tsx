@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import SecondaryTopMenuBar from "../components/SecondaryTopMenuBar";
 import TopMenuBar from "../components/TopMenuBar";
 import BottomMenuBar from "../components/BottomMenuBar";
@@ -13,6 +13,14 @@ function Home(){
     const [isWorkspaceVisible, setIsWorkspaceVisible] = useState(false)
     const [isLeftSectionVisible, setIsLeftSectionVisible] = useState(true)
     const [isRightSectionVisible, setIsRightSectionVisible] = useState(true)
+    const [zoomHandlers, setZoomHandlers] = useState<{ zoomIn: () => void; zoomOut: () => void } | null>(null)
+
+    // Clear zoom handlers when workspace is hidden
+    useEffect(() => {
+        if (!isWorkspaceVisible) {
+            setZoomHandlers(null)
+        }
+    }, [isWorkspaceVisible])
 
     const handleNewProject = () => {
         setIsNewProjectModalOpen(true)
@@ -67,6 +75,16 @@ function Home(){
             <SecondaryTopMenuBar 
                 onNewProject={handleNewProject}
                 onOpenProject={handleOpenProject}
+                onUndo={() => {
+                    // TODO: Implement undo functionality
+                    console.log('Undo clicked')
+                }}
+                onRedo={() => {
+                    // TODO: Implement redo functionality
+                    console.log('Redo clicked')
+                }}
+                onZoomIn={zoomHandlers?.zoomIn}
+                onZoomOut={zoomHandlers?.zoomOut}
             />
             <BottomMenuBar />
             {isWorkspaceVisible ? (
@@ -75,6 +93,7 @@ function Home(){
                     isRightSectionVisible={isRightSectionVisible}
                     onToggleLeftSection={toggleLeftSection}
                     onToggleRightSection={toggleRightSection}
+                    onRegisterZoomHandlers={setZoomHandlers}
                 />
             ) : (
                 <InitialBody 

@@ -3,9 +3,13 @@ import "../../styles/secondaryTopMenuBar.css"
 interface SecondaryTopMenuBarProps {
     onNewProject?: () => void
     onOpenProject?: () => void
+    onUndo?: () => void
+    onRedo?: () => void
+    onZoomIn?: () => void
+    onZoomOut?: () => void
 }
 
-function SecondaryTopMenuBar({ onNewProject, onOpenProject }: SecondaryTopMenuBarProps){
+function SecondaryTopMenuBar({ onNewProject, onOpenProject, onUndo, onRedo, onZoomIn, onZoomOut }: SecondaryTopMenuBarProps){
     return(
             <div className="vertical-bar-container secondary-bar">
             <div className="secondary-group explorer-group first-group">
@@ -36,6 +40,60 @@ function SecondaryTopMenuBar({ onNewProject, onOpenProject }: SecondaryTopMenuBa
                         className="secondary-menu-items"
                         src="src/assets/save-file.svg"
                         alt="Save file"
+                        draggable={false}
+                    />
+                </button>
+            </div>
+
+            <div className="secondary-group edit-group">
+                <button 
+                    className="secondary-menu-items-button"
+                    onClick={onUndo}
+                    title="Annulla"
+                >
+                    <img
+                        className="secondary-menu-items"
+                        src="src/assets/undo.svg"
+                        alt="Undo"
+                        draggable={false}
+                    />
+                </button>
+                <button 
+                    className="secondary-menu-items-button"
+                    onClick={onRedo}
+                    title="Ripeti"
+                >
+                    <img
+                        className="secondary-menu-items"
+                        src="src/assets/redo.svg"
+                        alt="Redo"
+                        draggable={false}
+                    />
+                </button>
+            </div>
+
+            <div className="secondary-group zoom-group">
+                <button 
+                    className="secondary-menu-items-button"
+                    onClick={onZoomIn}
+                    title="Ingrandisci"
+                >
+                    <img
+                        className="secondary-menu-items"
+                        src="src/assets/zoom-in.svg"
+                        alt="Zoom in"
+                        draggable={false}
+                    />
+                </button>
+                <button 
+                    className="secondary-menu-items-button"
+                    onClick={onZoomOut}
+                    title="Riduci"
+                >
+                    <img
+                        className="secondary-menu-items"
+                        src="src/assets/zoom-out.svg"
+                        alt="Zoom out"
                         draggable={false}
                     />
                 </button>
