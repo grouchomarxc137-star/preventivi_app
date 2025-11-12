@@ -1,16 +1,32 @@
 import { useState } from 'react'
 import "../../styles/initialBody.css"
 import NewProjectModal from "./NewProjectModal"
+import OpenProjectModal from "./OpenProjectModal"
 
 function InitialBody(){
-    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false)
+    const [isOpenProjectModalOpen, setIsOpenProjectModalOpen] = useState(false)
 
     const handleNewProject = () => {
-        setIsModalOpen(true)
+        setIsNewProjectModalOpen(true)
     }
 
-    const handleCloseModal = () => {
-        setIsModalOpen(false)
+    const handleCloseNewProjectModal = () => {
+        setIsNewProjectModalOpen(false)
+    }
+
+    const handleOpenProject = () => {
+        setIsOpenProjectModalOpen(true)
+    }
+
+    const handleCloseOpenProjectModal = () => {
+        setIsOpenProjectModalOpen(false)
+    }
+
+    const handleOpenFile = () => {
+        console.log('Opening file dialog...')
+        // TODO: Implement file dialog
+        setIsOpenProjectModalOpen(false)
     }
 
     const handleSubmit = (data: {
@@ -37,13 +53,18 @@ function InitialBody(){
                 per cominciare.</p></div>
                 <div className="project-selection-buttons">
                     <button className="project-button newProjectButton" onClick={handleNewProject}>Nuovo progetto</button>
-                    <button className="project-button openProjectButton">Apri progetto</button>
+                    <button className="project-button openProjectButton" onClick={handleOpenProject}>Apri progetto</button>
                 </div>
             </div>
             <NewProjectModal
-                isOpen={isModalOpen}
-                onClose={handleCloseModal}
+                isOpen={isNewProjectModalOpen}
+                onClose={handleCloseNewProjectModal}
                 onSubmit={handleSubmit}
+            />
+            <OpenProjectModal
+                isOpen={isOpenProjectModalOpen}
+                onClose={handleCloseOpenProjectModal}
+                onOpenFile={handleOpenFile}
             />
         </>
     )
