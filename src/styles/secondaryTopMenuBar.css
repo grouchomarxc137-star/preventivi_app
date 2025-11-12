@@ -37,6 +37,10 @@
     position: relative;
 }
 
+.secondary-group.first-group {
+    margin-left: 10px;
+}
+
 /* Add a vertical separator before any group that follows another group */
 .secondary-group + .secondary-group:not(.no-separator)::before{
     content: "";

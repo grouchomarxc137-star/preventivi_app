@@ -1,24 +1,14 @@
 import "../../styles/secondaryTopMenuBar.css"
 
 interface SecondaryTopMenuBarProps {
+    onNewProject?: () => void
     onOpenProject?: () => void
 }
 
-function SecondaryTopMenuBar({ onOpenProject }: SecondaryTopMenuBarProps){
+function SecondaryTopMenuBar({ onNewProject, onOpenProject }: SecondaryTopMenuBarProps){
     return(
             <div className="vertical-bar-container secondary-bar">
-            <div className="secondary-group first-group">
-                <button className="secondary-menu-items-button first">
-                    <img
-                        className="secondary-menu-items"
-                        src="src/assets/sidebar-open.svg"
-                        alt="Collapse sidebar"
-                        draggable={false}
-                    />
-                </button>
-            </div>
-
-            <div className="secondary-group explorer-group">
+            <div className="secondary-group explorer-group first-group">
                 <button 
                     className="secondary-menu-items-button"
                     onClick={onOpenProject}
@@ -30,7 +20,10 @@ function SecondaryTopMenuBar({ onOpenProject }: SecondaryTopMenuBarProps){
                         draggable={false}
                     />
                 </button>
-                <button className="secondary-menu-items-button">
+                <button 
+                    className="secondary-menu-items-button"
+                    onClick={onNewProject}
+                >
                     <img
                         className="secondary-menu-items"
                         src="src/assets/add-file.svg"

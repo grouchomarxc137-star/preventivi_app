@@ -3,12 +3,16 @@ import SecondaryTopMenuBar from "../components/SecondaryTopMenuBar";
 import TopMenuBar from "../components/TopMenuBar";
 import BottomMenuBar from "../components/BottomMenuBar";
 import InitialBody from "../components/InitialBody";
+import Workspace from "../components/Workspace";
 import NewProjectModal from "../components/NewProjectModal";
 import OpenProjectModal from "../components/OpenProjectModal";
 
 function Home(){
     const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false)
     const [isOpenProjectModalOpen, setIsOpenProjectModalOpen] = useState(false)
+    const [isWorkspaceVisible, setIsWorkspaceVisible] = useState(false)
+    const [isLeftSectionVisible, setIsLeftSectionVisible] = useState(true)
+    const [isRightSectionVisible, setIsRightSectionVisible] = useState(true)
 
     const handleNewProject = () => {
         setIsNewProjectModalOpen(true)
@@ -43,6 +47,15 @@ function Home(){
     }) => {
         console.log('New project data:', data)
         // TODO: Handle project creation
+        setIsWorkspaceVisible(true)
+    }
+
+    const toggleLeftSection = () => {
+        setIsLeftSectionVisible(!isLeftSectionVisible)
+    }
+
+    const toggleRightSection = () => {
+        setIsRightSectionVisible(!isRightSectionVisible)
     }
 
     return(
@@ -52,14 +65,23 @@ function Home(){
                 onOpenProject={handleOpenProject}
             />
             <SecondaryTopMenuBar 
-  
-                onOpenProject={handleOpenProject}
-            />
-            <BottomMenuBar />
-            <InitialBody 
                 onNewProject={handleNewProject}
                 onOpenProject={handleOpenProject}
             />
+            <BottomMenuBar />
+            {isWorkspaceVisible ? (
+                <Workspace 
+                    isLeftSectionVisible={isLeftSectionVisible}
+                    isRightSectionVisible={isRightSectionVisible}
+                    onToggleLeftSection={toggleLeftSection}
+                    onToggleRightSection={toggleRightSection}
+                />
+            ) : (
+                <InitialBody 
+                    onNewProject={handleNewProject}
+                    onOpenProject={handleOpenProject}
+                />
+            )}
             <NewProjectModal
                 isOpen={isNewProjectModalOpen}
                 onClose={handleCloseNewProjectModal}
